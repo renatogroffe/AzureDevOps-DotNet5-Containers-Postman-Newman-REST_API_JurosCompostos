@@ -30,14 +30,14 @@ namespace APIFinancas.Controllers
                $"% Taxa de Juros: {percTaxa}");
 
             // Código comentado para simulação de falhas em testes automatizados
-            if (valorEmprestimo <= 0)
+            /*if (valorEmprestimo <= 0)
                 return GerarResultParamInvalido("Valor do Empréstimo");
 
             if (numMeses <= 0)
                 return GerarResultParamInvalido("Número de Meses");
 
             if (percTaxa <= 0)
-                return GerarResultParamInvalido("Percentual da Taxa de Juros");
+                return GerarResultParamInvalido("Percentual da Taxa de Juros");*/
 
             double valorFinalJuros =
                 CalculoFinanceiro.CalcularValorComJurosCompostos(
