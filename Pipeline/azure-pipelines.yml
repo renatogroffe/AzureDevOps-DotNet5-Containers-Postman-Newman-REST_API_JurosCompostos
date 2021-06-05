@@ -1,0 +1,118 @@
+# Extensão a ser instalada com a task para publicação do relatório
+# HTML do Postman + Newman
+# https://marketplace.visualstudio.com/items?itemName=MaciejMaciejewski.postman-report
+
+trigger:
+- main
+
+resources:
+- repo: self
+
+variables:
+  dockerRegistryServiceConnection: 'CONEXAO_ACR'
+  imageRepository: 'apifinancasazdevops'
+  containerRegistry: 'registry.azurecr.io'
+  dockerfilePath: '**/Dockerfile'
+  tag: '$(Build.BuildId)'
+  imagePullSecret: 'image-pull-secret'
+  testsDirectory: './Tests'
+
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+
+stages:
+- stage: BuildTestsPush
+  displayName: Build, Tests and Push stage
+  jobs:
+  - job: BuildTestsPush
+    displayName: Build, Tests e Push
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Docker@2
+      displayName: Build da imagem
+      inputs:
+        containerRegistry: '$(dockerRegistryServiceConnection)'
+        repository: '$(imageRepository)'
+        command: 'build'
+        Dockerfile: '**/Dockerfile'
+        tags: |
+          $(tag)
+          latest
+    - script: |
+        docker run --name api-testes -p 5000:80 -d $(containerRegistry)/$(imageRepository):$(tag)
+        docker container ls
+      displayName: Criação de container para testes com a API
+    - script: |
+        cd $(testsDirectory)
+        ls
+        newman run CalculoJurosCompostos.postman_collection.json -d data-tests.json
+      displayName: Testes da API REST com Newman
+    - script: |
+        npm install newman@5.1.2
+        echo "** Versão Global do Newman **"
+        newman -v
+        echo "** Versão Local do Newman **"
+        npx newman -v
+        cd $(testsDirectory)
+        npm install newman-reporter-htmlextra@1.21.0
+      displayName:  Instalar packages para uso newman-reporter-htmlextra
+      condition: always() 
+    - script: |
+        cd $(testsDirectory)
+        npx newman run CalculoJurosCompostos.postman_collection.json -d data-tests.json --reporters htmlextra --reporter-htmlextra-export ./newman/test-results.html
+        cd ./newman
+        ls
+      displayName: Gerar resultados em HTML dos testes da API REST com Newman
+      condition: always() 
+    - task: UploadPostmanHtmlReport@1
+      displayName: Publicar relatório em HTML com resultados dos testes da API REST com Newman
+      inputs:
+        cwd: '$(System.DefaultWorkingDirectory)/$(testsDirectory)'
+      condition: always() 
+    - task: Docker@2
+      displayName: Push da imagem
+      inputs:
+        containerRegistry: '$(dockerRegistryServiceConnection)'
+        repository: '$(imageRepository)'
+        command: 'push'
+        tags: |
+          $(tag)
+          latest
+
+    - upload: manifests
+      artifact: manifests
+
+- stage: Deploy
+  displayName: Deploy stage
+  dependsOn: BuildTestsPush
+
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy
+    pool:
+      vmImage: $(vmImageName)
+    environment: 'APIJuros.postman0'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: KubernetesManifest@0
+            displayName: Create imagePullSecret
+            inputs:
+              action: createSecret
+              secretName: $(imagePullSecret)
+              dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+
+          - task: KubernetesManifest@0
+            displayName: Deploy to Kubernetes cluster
+            inputs:
+              action: deploy
+              manifests: |
+                $(Pipeline.Workspace)/manifests/deployment.yml
+                $(Pipeline.Workspace)/manifests/service.yml
+              imagePullSecrets: |
+                $(imagePullSecret)
+              containers: |
+                $(containerRegistry)/$(imageRepository):$(tag)

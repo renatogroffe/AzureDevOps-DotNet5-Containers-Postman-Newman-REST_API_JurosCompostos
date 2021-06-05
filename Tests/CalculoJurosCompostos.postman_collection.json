@@ -1,0 +1,132 @@
+{
+	"info": {
+		"_postman_id": "e21d33c1-12ba-4a6e-aa75-5ef03568fba8",
+		"name": "CalculoJurosCompostos",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Requisicao Calculo",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/CalculoFinanceiro/juroscompostos?valorEmprestimo={{valorEmprestimo}}&numMeses={{numMeses}}&percTaxa={{percTaxa}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"CalculoFinanceiro",
+						"juroscompostos"
+					],
+					"query": [
+						{
+							"key": "valorEmprestimo",
+							"value": "{{valorEmprestimo}}"
+						},
+						{
+							"key": "numMeses",
+							"value": "{{numMeses}}"
+						},
+						{
+							"key": "percTaxa",
+							"value": "{{percTaxa}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"if (pm.iterationData.get(\"valorEmprestimo\") != undefined) {",
+					"    pm.collectionVariables.set(\"valorEmprestimo\", pm.iterationData.get(\"valorEmprestimo\"));",
+					"",
+					"    if (pm.iterationData.get(\"valorComJuros\") != undefined)",
+					"        pm.collectionVariables.set(\"valorComJuros\", pm.iterationData.get(\"valorComJuros\"));",
+					"    else",
+					"        pm.collectionVariables.set(\"valorComJuros\", -9999999);",
+					"}",
+					"",
+					"if (pm.iterationData.get(\"numMeses\") != undefined)",
+					"    pm.collectionVariables.set(\"numMeses\", pm.iterationData.get(\"numMeses\"));",
+					"",
+					"if (pm.iterationData.get(\"percTaxa\") != undefined)",
+					"    pm.collectionVariables.set(\"percTaxa\", pm.iterationData.get(\"percTaxa\"));"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"var valorEmprestimo = JSON.parse(pm.collectionVariables.get(\"valorEmprestimo\"));",
+					"var numMeses = JSON.parse(pm.collectionVariables.get(\"numMeses\"));",
+					"var percTaxa = JSON.parse(pm.collectionVariables.get(\"percTaxa\"));",
+					"",
+					"if (valorEmprestimo > 0 && numMeses > 0 && percTaxa > 0) {",
+					"    ",
+					"    pm.test(\"Retorno OK\", function() {",
+					"        pm.response.to.be.ok;",
+					"        pm.response.to.json;",
+					"        pm.response.to.be.withBody;",
+					"    });",
+					"",
+					"    var result = pm.response.json();",
+					"",
+					"    pm.test(\"Checar Valor Empréstimo\", function() {",
+					"        pm.expect(result.valorEmprestimo).to.eql(valorEmprestimo);",
+					"    });",
+					"",
+					"    pm.test(\"Checar Número de Meses\", function() {",
+					"        pm.expect(result.numMeses).to.eql(numMeses);",
+					"    });",
+					"",
+					"    pm.test(\"Checar Taxa Percentual\", function() {",
+					"        pm.expect(result.taxaPercentual).to.eql(percTaxa);",
+					"    });",
+					"",
+					"    pm.test(\"Checar Valor Final com Juros\", function() {",
+					"        pm.expect(result.valorFinalComJuros).to.eql(",
+					"            JSON.parse(pm.collectionVariables.get(\"valorComJuros\"))",
+					"        );",
+					"    });",
+					"}",
+					"else {",
+					"",
+					"    pm.test(\"Retorno Inválido\", function() {",
+					"        pm.response.to.be.badRequest;",
+					"    });",
+					"    ",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "valorEmprestimo",
+			"value": "10000.00"
+		},
+		{
+			"key": "numMeses",
+			"value": "12"
+		},
+		{
+			"key": "percTaxa",
+			"value": "2.00"
+		},
+		{
+			"key": "valorComJuros",
+			"value": "12682.42"
+		}
+	]
+}

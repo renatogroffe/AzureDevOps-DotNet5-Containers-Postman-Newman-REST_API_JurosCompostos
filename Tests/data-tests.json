@@ -1,0 +1,64 @@
+[
+    {
+        "valorEmprestimo": 10000.00,
+        "numMeses": 12,
+        "percTaxa": 2.00,
+        "valorComJuros": 12682.42
+    },
+    {
+        "valorEmprestimo": -11937.28,
+        "numMeses": 24,
+        "percTaxa": 4.00
+    },
+    {
+        "valorEmprestimo": 11937.28,
+        "numMeses": 24,
+        "percTaxa": 4.00,
+        "valorComJuros": 30598.88
+    },
+    {
+        "valorEmprestimo": 15000.00,
+        "numMeses": 0,
+        "percTaxa": 6.00
+    },
+    {
+        "valorEmprestimo": 15000.00,
+        "numMeses": 36,
+        "percTaxa": 6.00,
+        "valorComJuros": 122208.78
+    },
+    {
+        "valorEmprestimo": 10000.00,
+        "numMeses": 2,
+        "percTaxa": -3.00
+    },
+    {
+        "valorEmprestimo": 10000.00,
+        "numMeses": 2,
+        "percTaxa": 2.00,
+        "valorComJuros": 10404.00
+    },
+    {
+        "valorEmprestimo": 0.00,
+        "numMeses": 0,
+        "percTaxa": 0.00
+    },
+    {
+        "valorEmprestimo": 20000.00,
+        "numMeses": 36,
+        "percTaxa": 6.00,
+        "valorComJuros": 162945.04
+    },
+    {
+        "valorEmprestimo": 25000.00,
+        "numMeses": 48,
+        "percTaxa": 6.00,
+        "valorComJuros": 409846.79
+    },
+    {
+        "valorEmprestimo": 30000.00,
+        "numMeses": 3,
+        "percTaxa": 3.00,
+        "valorComJuros": 32781.81
+    }
+]
