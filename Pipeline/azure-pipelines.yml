@@ -50,12 +50,12 @@ stages:
         newman run CalculoJurosCompostos.postman_collection.json -d data-tests.json
       displayName: Testes da API REST com Newman
     - script: |
+        cd $(testsDirectory)
         npm install newman@5.1.2
         echo "** Versão Global do Newman **"
         newman -v
         echo "** Versão Local do Newman **"
         npx newman -v
-        cd $(testsDirectory)
         npm install newman-reporter-htmlextra@1.21.0
       displayName:  Instalar packages para uso newman-reporter-htmlextra
       condition: always() 
